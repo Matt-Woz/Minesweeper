@@ -1,5 +1,3 @@
-import java.awt.*;
-
 public class BombSquare extends GameSquare
 {
 
@@ -21,9 +19,9 @@ public class BombSquare extends GameSquare
     public void leftClicked() {
         if (!flagSet) {
             revealed = true;
-            System.out.println(hasBomb);
             if (hasBomb){
                 setImage("images/bomb.png");
+                revealBombs();
             } else if (!hasBomb) {
                 int bombCount = countSurroundings();
                 setImage(toString(bombCount));
@@ -46,7 +44,7 @@ public class BombSquare extends GameSquare
         }
     }
 
-    public int countSurroundings()
+    private int countSurroundings()
     {
         int bombCount = 0;
         int x = getXLocation();
@@ -65,7 +63,7 @@ public class BombSquare extends GameSquare
         }
         return bombCount;
     }
-    public void Expand()
+    private void Expand()
     {
         int bombCount = countSurroundings();
         int x = getXLocation();
@@ -81,14 +79,40 @@ public class BombSquare extends GameSquare
                         setImage(toString(bombCount));
                         revealed = true;
                         if(bombCount == 0){
-                            surrounding.Expand();
+                            surrounding.Expand(); //Recursive call
                         }
                     }
                 }
             }
         }
     }
-    public String toString(int bombCount)
+
+    private void revealBombs() {
+        int x = getXLocation();
+        int y = getYLocation();
+        for (int i = -1; i <= 1; i++) {
+            for (int k = -1; k <= 1; k++) //Double for loop checks surrounding squares
+            {
+                if (board.getSquareAt(x + i, y + k) == null) {
+                } //Error handling -> do nothing
+                else {
+                    BombSquare surrounding = (BombSquare) board.getSquareAt(x + i, y + k);
+                    if(!surrounding.revealed && surrounding.hasBomb)
+                    {
+                        surrounding.setImage("images/bomb.png");
+                        revealed = true;
+                        surrounding.revealBombs();
+                            }
+                    else if(!surrounding.revealed && !surrounding.hasBomb){
+                            revealed = true;
+                            surrounding.revealBombs();
+
+                        }
+                    }
+                }
+            }
+        }
+    private String toString(int bombCount)
     {
         return "images/"+bombCount+".png";
     }
